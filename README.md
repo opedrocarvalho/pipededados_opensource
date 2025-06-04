@@ -12,15 +12,21 @@ A motivação principal é demonstrar como soluções de código aberto podem se
 
 ## 🚀 Como executar o projeto
 
-### 1. Instale o Python
+### 1. Clone o repositório
+
+git clone https://github.com/opedrocarvalho/pipededados_opensource.git
+cd pipededados_opensource
+
+
+### 2. Instale o Python
 
 https://www.python.org/downloads/
 
-### 2. Instale as bibliotecas necessárias
+### 3. Instale as bibliotecas necessárias
 
 https://www.selenium.dev/
 https://docs.python.org/3/library/datetime.html
 
-### 3. Instale o Duck DB
+### 4. Instale o Duck DB
 
 https://duckdb.org/docs/installation/?version=stable&environment=cli&platform=macos&download_method=direct
