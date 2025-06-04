@@ -2,37 +2,49 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import json
 from datetime import datetime
 import os
 import duckdb
 
+# Configurações iniciais
 data_hoje = datetime.today().strftime("%Y-%m-%d")
-caminho_json = os.path.join(
-    r"C:\Users\Pedro Carvalho\Desktop\json",
-    f"comptoir_resultados_{data_hoje}.json"
-)
 caminho_banco = os.path.join(
     r"C:\Users\Pedro Carvalho\Desktop\json",
     "destinosbrasilbronze.duckdb"
 )
 
+# Configuração avançada do navegador para evitar detecção
 options = webdriver.ChromeOptions()
 options.add_argument("--start-maximized")
 options.add_argument("--headless") 
 options.add_argument("--disable-blink-features=AutomationControlled")
 options.add_experimental_option("excludeSwitches", ["enable-automation"])
 
+# Inicialização do driver e DuckDB
 driver = webdriver.Chrome(options=options)
 wait = WebDriverWait(driver, 15)
+con = duckdb.connect(caminho_banco)
 
 try:
-    driver.get("https://www.comptoirdesvoyages.fr/voyage-pays/bresil/bra")
+    # Criar tabela se não existir
+    con.execute("""
+        CREATE OR REPLACE TABLE Comptoir_Des_Voyages (
+            data_extracao DATE,
+            destino VARCHAR,
+            url VARCHAR,
+            descricao VARCHAR,
+            duracao VARCHAR,
+            preco VARCHAR
+        )
+    """)
     
+    # Acesso à página
+    driver.get("https://www.comptoirdesvoyages.fr/voyage-pays/bresil/bra")
     wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "module__tripCard__card__info")))
 
-    resultados = []
+    # Processamento dos cards
     cards = driver.find_elements(By.CLASS_NAME, "module__tripCard__card__info")
+    dados_para_inserir = []
 
     for card in cards:
         try:
@@ -42,27 +54,26 @@ try:
             duracao = card.find_element(By.CLASS_NAME, "module__tripCard__card__duration").text.strip()
             preco = card.find_element(By.CLASS_NAME, "module__tripCard__card__price").text.strip()
 
-            resultados.append({
-                "destino": destino,
-                "url": url,
-                "descricao": descricao,
-                "duracao": duracao,
-                "preco": preco
-            })
+            dados_para_inserir.append((
+                data_hoje,
+                destino,
+                url,
+                descricao,
+                duracao,
+                preco
+            ))
         except Exception as e:
-            print("Erro ao processar:", e)
+            print(f"Erro ao processar card: {e}")
 
-    # Salvar em JSON
-    with open(caminho_json, mode="w", encoding="utf-8") as f:
-        json.dump(resultados, f, ensure_ascii=False, indent=2)
-
-    # Salvar no DuckDB
-    con = duckdb.connect(caminho_banco)
-    con.execute(f"""
-        CREATE OR REPLACE TABLE Comptoir_Des_Voyages AS 
-        SELECT * FROM read_json_auto('{caminho_json}')
-    """)
-    con.close()
+    # Inserção em lote no DuckDB
+    if dados_para_inserir:
+        con.executemany("""
+            INSERT INTO Comptoir_Des_Voyages 
+            (data_extracao, destino, url, descricao, duracao, preco)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, dados_para_inserir)
+        
 
 finally:
     driver.quit()
+    con.close()
