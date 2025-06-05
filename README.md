@@ -12,9 +12,8 @@ A motivação principal é demonstrar como soluções de código aberto podem se
 
 ## 🚀 Como executar o projeto
 
-```bash
-
 ### 1. Clone o repositório
+```bash
 
 git clone https://github.com/opedrocarvalho/pipededados_opensource.git
 cd pipededados_opensource
