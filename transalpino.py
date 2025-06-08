@@ -24,7 +24,7 @@ def extrair_viagens_brasil(navegador):
                 })
     return resultados
 
-# URLs a serem raspadas
+
 urls = [
     "https://www.transalpino.pt/cat/5-praias/",
     "https://www.transalpino.pt/cat/3-cruzeiros/",
@@ -34,12 +34,12 @@ urls = [
 ]
 
 caminho_banco = os.path.join(
-    r"C:\Users\Pedro Carvalho\Desktop\json", "destinosbrasilbronze.duckdb"
+    r"C:\Users\Pedro Carvalho\Desktop\database", "destinosbrasilbronze.duckdb"
 )
 con = duckdb.connect(caminho_banco)
 
 con.execute("""
-    CREATE OR REPLACE TABLE Transalpino (
+    CREATE TABLE IF NOT EXISTS Transalpino (
         data_extracao DATE,
         destino VARCHAR,
         preco VARCHAR,

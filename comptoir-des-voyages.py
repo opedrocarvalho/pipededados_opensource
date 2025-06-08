@@ -6,29 +6,29 @@ from datetime import datetime
 import os
 import duckdb
 
-# Configurações iniciais
+
 data_hoje = datetime.today().strftime("%Y-%m-%d")
 caminho_banco = os.path.join(
-    r"C:\Users\Pedro Carvalho\Desktop\json",
+    r"C:\Users\Pedro Carvalho\Desktop\databas",
     "destinosbrasilbronze.duckdb"
 )
 
-# Configuração avançada do navegador para evitar detecção
+
 options = webdriver.ChromeOptions()
 options.add_argument("--start-maximized")
 options.add_argument("--headless") 
 options.add_argument("--disable-blink-features=AutomationControlled")
 options.add_experimental_option("excludeSwitches", ["enable-automation"])
 
-# Inicialização do driver e DuckDB
+
 driver = webdriver.Chrome(options=options)
 wait = WebDriverWait(driver, 15)
 con = duckdb.connect(caminho_banco)
 
 try:
-    # Criar tabela se não existir
+
     con.execute("""
-        CREATE OR REPLACE TABLE Comptoir_Des_Voyages (
+        CREATE TABLE IF NOT EXISTS Comptoir_Des_Voyages (
             data_extracao DATE,
             destino VARCHAR,
             url VARCHAR,
@@ -38,11 +38,11 @@ try:
         )
     """)
     
-    # Acesso à página
+
     driver.get("https://www.comptoirdesvoyages.fr/voyage-pays/bresil/bra")
     wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "module__tripCard__card__info")))
 
-    # Processamento dos cards
+
     cards = driver.find_elements(By.CLASS_NAME, "module__tripCard__card__info")
     dados_para_inserir = []
 
@@ -65,7 +65,7 @@ try:
         except Exception as e:
             print(f"Erro ao processar card: {e}")
 
-    # Inserção em lote no DuckDB
+
     if dados_para_inserir:
         con.executemany("""
             INSERT INTO Comptoir_Des_Voyages 

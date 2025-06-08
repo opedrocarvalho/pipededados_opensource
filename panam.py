@@ -8,18 +8,15 @@ import os
 import duckdb
 import time
 
-# Configurações
 data_hoje = datetime.today().strftime("%Y-%m-%d")
-caminho_banco = os.path.join(r"C:\Users\Pedro Carvalho\Desktop\json", "destinosbrasilbronze.duckdb")
+caminho_banco = os.path.join(r"C:\Users\Pedro Carvalho\Desktop\database", "destinosbrasilbronze.duckdb")
 
-# Configuração do navegador
 options = webdriver.ChromeOptions()
 options.add_argument("--start-maximized")
 options.add_argument("--headless")
 options.add_argument("--disable-blink-features=AutomationControlled")
 options.add_experimental_option("excludeSwitches", ["enable-automation"])
 
-# Inicialização do driver e DuckDB
 driver = webdriver.Chrome(options=options)
 wait = WebDriverWait(driver, 20)
 actions = ActionChains(driver)
@@ -27,7 +24,7 @@ con = duckdb.connect(caminho_banco)
 
 try:
     con.execute("""
-        CREATE OR REPLACE TABLE Panam (
+        CREATE TABLE IF NOT EXISTS Panam (
             data_extracao DATE,
             destino VARCHAR,
             preco_usd VARCHAR,
@@ -37,7 +34,6 @@ try:
     
     driver.get("https://www.panam.cl/")
     
-    # Fechar pop-up de cookies
     try:
         cookie_btn = wait.until(EC.element_to_be_clickable((By.ID, "cookie-btn")))
         cookie_btn.click()

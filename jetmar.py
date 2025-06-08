@@ -6,11 +6,9 @@ import os
 import duckdb
 import time
 
-# Configurações
 data_hoje = datetime.today().strftime("%Y-%m-%d")
-caminho_banco = os.path.join(r"C:\Users\Pedro Carvalho\Desktop\json", "destinosbrasilbronze.duckdb")
+caminho_banco = os.path.join(r"C:\Users\Pedro Carvalho\Desktop\database", "destinosbrasilbronze.duckdb")
 
-# Configuração do navegador
 options = Options()
 options.add_argument("--start-maximized")
 options.add_argument("--headless")
@@ -22,7 +20,7 @@ con = duckdb.connect(caminho_banco)
 
 try:
     con.execute("""
-        CREATE OR REPLACE TABLE Jetmar (
+        CREATE TABLE IF NOT EXISTS Jetmar (
             data_extracao DATE,
             destino VARCHAR,
             descricao VARCHAR,
@@ -55,7 +53,6 @@ try:
         except Exception as e:
             print(f"Erro ao processar pacote: {str(e)}")
 
-    # Inserção em lote no DuckDB
     if dados_para_inserir:
         con.executemany("""
             INSERT INTO Jetmar (data_extracao, destino, descricao, preco_completo)

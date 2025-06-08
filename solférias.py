@@ -9,7 +9,7 @@ import duckdb
 
 data_hoje = datetime.today().strftime("%Y-%m-%d")
 caminho_banco = os.path.join(
-    r"C:\Users\Pedro Carvalho\Desktop\json", "destinosbrasilbronze.duckdb"
+    r"C:\Users\Pedro Carvalho\Desktop\database", "destinosbrasilbronze.duckdb"
 )
 
 options = Options()
@@ -38,7 +38,7 @@ try:
     con = duckdb.connect(caminho_banco)
     
     con.execute("""
-        CREATE OR REPLACE TABLE Sol_Ferias (
+        CREATE TABLE IF NOT EXISTS Sol_Ferias (
             data_extracao DATE,
             destino VARCHAR,
             preco VARCHAR
